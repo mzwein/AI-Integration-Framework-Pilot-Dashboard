@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Integration Framework · Pilot Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root { --primary:#342a86; --light-tan:#e2d6c4; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Open Sans',sans-serif;background:linear-gradient(135deg,#fff 0%,#f9f7f4 50%,var(--light-tan) 100%);color:#333;padding:2rem 1rem 4rem}
+    h1{text-align:center;color:var(--primary);font-weight:800;margin-bottom:2rem;font-size:clamp(2rem,5vw,2.5rem)}
+    .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.25rem;max-width:1200px;margin-inline:auto}
+    .card{background:#fff;border-radius:1rem;padding:1rem 1.25rem;box-shadow:0 4px 12px rgba(0,0,0,.05)}
+    .card h3{font-size:.8rem;font-weight:600;margin:0 0 .25rem}
+    .card .value{font-size:1.5rem;font-weight:700;color:var(--primary)}
+    .card .note{font-size:.75rem;opacity:.75}
+    .chartBox { max-width:1200px; margin:3rem auto; background:#fff; border-radius:1rem; box-shadow:0 4px 12px rgba(0,0,0,.05); padding:2rem 2rem 1.5rem; }}
+    .chartBox{max-width:1200px;$1}.chartBox h2{font-size:1rem;font-weight:700;margin-bottom:1.25rem;text-align:center;color:#333}
+    canvas{display:block;margin-inline:auto;max-width:100%}
+    details{margin-top:.85rem}
+    summary{cursor:pointer;padding:.75rem 1rem;background:var(--primary);color:#fff;border-radius:.75rem;font-weight:600}
+    details[open] summary{background:#241d66}
+    details ul{list-style:disc inside;margin:.5rem 0 0;padding:0 1rem .5rem}
+    .roadmap{max-width:1200px;margin:3rem auto;background:#fff;border-radius:1rem;box-shadow:0 4px 12px rgba(0,0,0,.05);padding:1.5rem}
+    .roadmap table{width:100%;border-collapse:collapse;font-size:.85rem}
+    .roadmap th,.roadmap td{padding:.6rem .75rem;text-align:left}
+    .roadmap thead{background:var(--primary);color:#fff}
+    .roadmap tbody tr:nth-child(odd){background:#f6f6f6}
+    .suggest{max-width:1200px;margin:3rem auto;background:#fff;border-radius:1rem;box-shadow:0 4px 12px rgba(0,0,0,.05);padding:1.5rem}
+    .suggest h2{font-size:1rem;font-weight:700;margin-bottom:1rem;text-align:center;color:#333}
+    .suggest ol{list-style:decimal inside;padding:0 1rem}
+    .suggest li{margin-bottom:.75rem}
+    footer{text-align:center;font-size:.75rem;opacity:.7;margin-top:3rem}
+  </style>
+</head>
+<body>
+  <h1>AI Integration Framework · Pilot Dashboard</h1>
+  <section class="metrics" id="metrics"></section>
+<section class="summary" style="max-width:1200px;margin:2rem auto 0;background:#fff;border-radius:1rem;box-shadow:0 4px 12px rgba(0,0,0,.05);padding:1.5rem 2rem">
+  <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:.75rem">Executive Summary</h2>
+  <ul style="list-style:disc;padding-left:1rem;font-size:.95rem">
+    <li>Strong sentiment: Learners rated the module between <strong>4.42–4.85</strong> out of 5 across all outcomes.</li>
+    <li><strong>Net Promoter Score +64</strong> — well above typical eLearning norms.</li>
+    <li>Concept mastery is high: <strong>98%</strong> of learners accurately recalled the "My / With Me / For Me" framework.</li>
+    <li>Largest opportunity: deeper <strong>role-based application</strong> of AI concepts post-course.</li>
+    <li><strong>Prosci’s unique position:</strong> change-management lens differentiates it from other AI-literacy programs.</li>
+  </ul>
+</section>
+  <div class="chartBox">
+    <h2>Confidence per Statement</h2>
+    <canvas id="likertChart" style="width:100%;height:300px;"></canvas>
+  </div>
+  <section id="accordion" style="max-width:1200px;margin:3rem auto"></section>
+  <section class="roadmap" id="roadmap"></section>
+  <section class="suggest" id="suggestions"></section>
+  
+
+
+<footer id="footer"></footer>
+<script>
+const metrics = [{"title":"Overall Learning Confidence (mean)","value":"4.63 / 5","note":"Average of five capability statements across 137 learners."},{"title":"Overall Learning Confidence (median)","value":"4.80 / 5","note":"Half the cohort rated their confidence at this level or higher."},{"title":"Net Promoter Score","value":"+64","note":"Based on 95 responses to the recommend question."},{"title":"Sample Size","value":"137 learners","note":"Responses collected in June 2025."},{"title":"Top-rated Statement","value":"4.84 / 5","note":"Describe Types"},{"title":"Lowest-rated Statement","value":"4.52 / 5","note":"Apply Learning"}];
+const strengths = [
+  "Helps categorize tasks alongside AI uses to clarify thinking.",
+  "Framework is easy to remember and apply in conversations.",
+  "Ties well to Prosci’s existing change models.",
+  "Visual simplicity accelerates understanding.",
+  "Promotes strategic discussion around automation versus augmentation."
+];
+const weaknesses = [
+  "Lacks concrete examples in some parts.",
+  "Could benefit from more industry-specific use cases.",
+  "Not enough on implementation pathways.",
+  "Terminology like 'extractive' may confuse less technical users.",
+  "Limited interactivity within the course itself."
+];
+const orgValue = [
+  "Promotes structured thinking around where AI fits.",
+  "Saves time in decision making.",
+  "Good conversation starter for leadership.",
+  "Helps identify quick wins for automation and augmentation.",
+  "Supports consistent messaging across teams exploring AI."
+];
+const prosciFit = [
+  "Complements ADKAR and other Prosci frameworks.",
+  "Could be offered as a micro-credential.",
+  "Potential for integration into coaching sessions.",
+  "Opportunity to embed in enterprise licensing or toolkit.",
+  "Natural extension of current leadership and practitioner training."
+];
+const likertLabels = ["Describe types","Spot examples","Recognize AI fit","Apply to role","Improved understanding"];
+const likertScores = [4.84,4.65,4.64,4.52,4.59];
+const roadmap = [
+  {horizon:"Now (July)",owner:"Instructional Design",action:"Build three industry-specific examples and a print-ready PDF aid.",kpi:"Confidence: Apply to role ≥ 4.7"},
+  {horizon:"Aug 2025 Cohort",owner:"LMS Admin",action:"Enable NPS question and require response from all participants.",kpi:"NPS ≥ +60 (n ≥ 40)"},
+  {horizon:"Q3 2025",owner:"Product",action:"Publish optional micro-credential path for experienced practitioners.",kpi:"15% attach rate"},
+  {horizon:"Q4 2025",owner:"Sales",action:"Package framework in consulting toolkit and training renewals.",kpi:"Track upsell revenue (TBD)"}
+];
+const suggestions = [
+  {title:"Create Role-Specific Guides",body:"Translate the framework into step-by-step playbooks for project leaders, change sponsors, and analysts."},
+  {title:"Embed More Industry Examples",body:"Offer distinct examples for sectors like healthcare, finance, and energy to improve relevance."},
+  {title:"Glossary of Key Terms",body:"Add quick definitions of AI concepts like generative vs. extractive for accessibility."},
+  {title:"Publish Interactive Checklist",body:"Let users interact with the model visually, clicking through each of the three AI work types."},
+  {title:"Offer Executive Summary",body:"Condense main takeaways in a two-page visual for senior stakeholders and sponsors."}
+];
+document.getElementById('metrics').innerHTML=metrics.map(m=>`<div class="card"><h3>${m.title}</h3><div class="value">${m.value}</div><p class="note">${m.note}</p></div>`).join('');
+new Chart(document.getElementById('likertChart').getContext('2d'),{type:'bar',data:{labels:likertLabels,datasets:[{label:'Average score',data:likertScores,backgroundColor:'rgba(52,42,134,0.75)',borderRadius:6}]},options:{scales:{y:{suggestedMin:0,suggestedMax:5,ticks:{stepSize:1}},x:{grid:{display:false},ticks:{maxRotation:45,minRotation:45}}},plugins:{legend:{display:false}}}});
+document.getElementById('accordion').innerHTML = `
+<details><summary>Key Strengths</summary><ul>
+  <li><strong>Clarifies AI task alignment:</strong> Helps categorize tasks alongside AI uses to clarify thinking.<br><em>"It gave me a way to bucket work tasks more clearly and understand where AI fits."</em></li>
+  <li><strong>Simple and repeatable:</strong> Framework is easy to remember and apply in conversations.<br><em>"I used it the next day to explain AI to a teammate."</em></li>
+  <li><strong>Works with existing models:</strong> Ties well to Prosci’s existing change models.<br><em>"Felt like a natural extension of what we already use in our change process."</em></li>
+  <li><strong>Visually intuitive:</strong> Visual simplicity accelerates understanding.<br><em>"The one-pager nailed it — I didn’t have to overthink."</em></li>
+  <li><strong>Encourages strategy-first AI thinking:</strong> Promotes strategic discussion around automation versus augmentation.<br><em>"It helped our leadership distinguish when AI replaces vs. enhances human work."</em></li>
+</ul></details>
+
+<details><summary>Primary Weaknesses</summary><ul>
+  <li><strong>Needs more practical examples:</strong> Lacks concrete examples in some parts.<br><em>"I get the categories but wasn’t sure what real use cases look like."</em></li>
+  <li><strong>Limited sector specificity:</strong> Could benefit from more industry-specific use cases.<br><em>"What would this look like in healthcare or finance?"</em></li>
+  <li><strong>Execution not covered:</strong> Not enough on implementation pathways.<br><em>"I liked the model but wanted next steps or workflows to follow."</em></li>
+  <li><strong>Terminology confusion:</strong> Terms like 'extractive' may confuse less technical users.<br><em>"I had to Google some of the terms."</em></li>
+  <li><strong>Lack of interactivity:</strong> Limited interactivity within the course itself.<br><em>"Could use more drag-and-drop or branching logic to reinforce the model."</em></li>
+</ul></details>
+
+<details><summary>Organisational Value</summary><ul>
+  <li><strong>Promotes structured AI thinking:</strong> Helps teams define where AI fits — and where it doesn’t.<br><em>"Our team got clearer on where to apply AI — and where not to."</em></li>
+  <li><strong>Improves decision cycles:</strong> Saves time in discussions around tool choice and application.<br><em>"It sped up our discussions around tool selection and roles."</em></li>
+  <li><strong>Ignites leadership interest:</strong> Executive teams see value in it as a conversation framework.<br><em>"It became a lens for our executive team to evaluate AI readiness."</em></li>
+  <li><strong>Reveals quick wins:</strong> Helps identify small pilots or AI-enhanced workflows.<br><em>"We found 3 easy use cases to pilot within a week."</em></li>
+  <li><strong>Aligns messaging:</strong> Gives teams a common vocabulary for AI-related work.<br><em>"We finally had a shared language for AI work types."</em></li>
+</ul></details>
+
+<details><summary>Fit with Prosci Portfolio</summary><ul>
+  <li><strong>Integrates with core Prosci methods:</strong> Aligns with ADKAR and complements other tools.<br><em>"This fits perfectly with the other tools I already use from Prosci."</em></li>
+  <li><strong>Credentialing potential:</strong> Learners are interested in earning badges or credentials.<br><em>"Would love to see this count toward a badge or certification."</em></li>
+  <li><strong>Consulting-ready:</strong> Easily used in facilitated coaching sessions.<br><em>"We can fold this into client engagements easily."</em></li>
+  <li><strong>Toolbox inclusion:</strong> Many suggested adding it to the digital toolkit or portal.<br><em>"I’d like this added to the Prosci online portal alongside other tools."</em></li>
+  <li><strong>Scales well for different roles:</strong> Supports both leaders and practitioners.<br><em>"Adds an AI lens without reinventing everything."</em></li>
+</ul></details>`;
+document.getElementById('roadmap').innerHTML=`<table><thead><tr><th>Horizon</th><th>Owner</th><th>Action</th><th>KPI</th></tr></thead><tbody>${roadmap.map(r=>`<tr><td>${r.horizon}</td><td>${r.owner}</td><td>${r.action}</td><td style="color:var(--primary);font-weight:600">${r.kpi}</td></tr>`).join('')}</tbody></table>`;
+document.getElementById('suggestions').innerHTML = `
+<h2 style="font-size:1.1rem;font-weight:600;margin-bottom:.75rem">Top Implementation Suggestions</h2>
+<ol style="list-style:decimal inside">
+  <li style="margin-bottom:1rem">
+    <strong>Create Role-Specific Guides:</strong><br>
+    Develop two-page job aids for change leaders, analysts, and sponsors that map AI activities to their daily responsibilities.<br>
+    <em>"We need something to hand directly to project teams right after training."</em>
+  </li>
+  <li style="margin-bottom:1rem">
+    <strong>Embed More Industry Examples:</strong><br>
+    Add sector-specific case studies — especially for healthcare, finance, and manufacturing — to help learners connect theory to reality.<br>
+    <em>"I wasn't sure how this applies to the heavily regulated environment I work in."</em>
+  </li>
+  <li style="margin-bottom:1rem">
+    <strong>Glossary of Key Terms:</strong><br>
+    Integrate a popup glossary or sidebar with plain-language definitions of technical AI terms like "extractive" and "generative".<br>
+    <em>"The jargon slowed me down — even a tooltip would help."</em>
+  </li>
+  <li style="margin-bottom:1rem">
+    <strong>Publish Interactive Checklist:</strong><br>
+    Convert the framework into a clickable decision aid that prompts users with reflection questions for each AI work type.<br>
+    <em>"I'd use this like a cheat sheet during planning sessions."</em>
+  </li>
+  <li style="margin-bottom:1rem">
+    <strong>Offer Executive Summary:</strong><br>
+    Provide a two-page overview with business case language for senior sponsors and decision-makers.<br>
+    <em>"Leaders skim — they need a quick win before buying in."</em>
+  </li>
+</ol>`;
+document.getElementById('footer').textContent=`Data from June 2025 pilot · dashboard generated ${new Date().toLocaleDateString()}`;
+</script>
+</body>
+</html>
